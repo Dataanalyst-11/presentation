@@ -1,0 +1,165 @@
+// Initialize data
+let users = [
+  { username: 'receiver@example.com', password: 'recv123', role: 'receive', email: 'receiver@example.com' },
+  { username: 'dispatcher@example.com', password: 'disp123', role: 'dispatch', email: 'dispatcher@example.com' },
+  { username: 'manager@example.com', password: 'mgr123', role: 'manager', email: 'manager@example.com' }
+];
+
+let inventory = [];
+let transactions = [];
+let currentUser = null;
+
+// Helpers
+function renderTable(id, data, headers) {
+  const table = document.getElementById(id);
+  table.innerHTML = '';
+  if (data.length === 0) return table.innerHTML = '<tr><td colspan="' + headers.length + '">No data</td></tr>';
+  const thead = '<tr>' + headers.map(h => '<th>' + h + '</th>').join('') + '</tr>';
+  const tbody = data.map(row => '<tr>' + headers.map(h => '<td>' + row[h] + '</td>').join('') + '</tr>').join('');
+  table.innerHTML = thead + tbody;
+}
+
+function updateInventoryTables() {
+  renderTable('inventory-table', inventory, ['ItemID', 'ItemName', 'Quantity', 'Date']);
+  renderTable('dispatcher-inventory', inventory, ['ItemID', 'ItemName', 'Quantity', 'Date']);
+  renderTable('manager-inventory', inventory, ['ItemID', 'ItemName', 'Quantity', 'Date']);
+}
+
+function updateDispatchTables() {
+  const pending = transactions.filter(t => t.Type === 'Dispatch' && t.Status === 'Pending');
+  const approved = transactions.filter(t => t.Type === 'Dispatch' && t.Status === 'Approved');
+  renderTable('pending-dispatch', pending, ['ItemID', 'ItemName', 'Quantity', 'Date', 'User']);
+  renderTable('approved-dispatch', approved, ['ItemID', 'ItemName', 'Quantity', 'Date', 'User']);
+  renderTable('approve-table', pending, ['TransactionID', 'ItemID', 'ItemName', 'Quantity', 'Date', 'User']);
+  renderTable('log-table', transactions, ['TransactionID', 'Type', 'ItemID', 'ItemName', 'Quantity', 'Status', 'Date', 'User']);
+}
+
+// Auth
+$('#auth-btn').click(() => {
+  const mode = $('input[name="authMode"]:checked').val();
+  const username = $('#username').val();
+  const password = $('#password').val();
+
+  if (mode === 'Sign In') {
+    const user = users.find(u => u.username === username && u.password === password);
+    if (user) {
+      currentUser = user;
+      $('#auth-section').hide();
+      $('#main-section').show();
+      $(`#${user.role}-section`).show();
+      updateInventoryTables();
+      updateDispatchTables();
+    } else {
+      $('#auth-status').text('Invalid credentials');
+    }
+  } else {
+    const role = $('#role').val();
+    const email = $('#email').val();
+    if (users.some(u => u.username === username)) {
+      $('#auth-status').text('Username already exists');
+    } else {
+      const newUser = { username, password, role, email };
+      users.push(newUser);
+      currentUser = newUser;
+      $('#auth-section').hide();
+      $('#main-section').show();
+      $(`#${role}-section`).show();
+      updateInventoryTables();
+      updateDispatchTables();
+    }
+  }
+});
+
+// Toggle signup fields
+$('input[name="authMode"]').change(() => {
+  $('#signup-fields').toggle($('#signUp').is(':checked'));
+});
+
+// Logout
+$('#logout-btn').click(() => {
+  currentUser = null;
+  $('#main-section').hide();
+  $('.section').hide();
+  $('#auth-section').show();
+  $('#username').val('');
+  $('#password').val('');
+});
+
+// Receive items
+$('#recv-btn').click(() => {
+  const id = $('#recv-id').val();
+  const name = $('#recv-name').val();
+  const qty = parseInt($('#recv-qty').val());
+  const date = $('#recv-date').val();
+
+  let item = inventory.find(i => i.ItemID === id);
+  if (item) {
+    item.Quantity += qty;
+    item.ItemName = name;
+    item.Date = date;
+  } else {
+    inventory.push({ ItemID: id, ItemName: name, Quantity: qty, Date: date });
+  }
+
+  const txId = 'TX' + Date.now();
+  transactions.push({ TransactionID: txId, Type: 'Receive', ItemID: id, ItemName: name, Quantity: qty, Status: 'Approved', Date: date, User: currentUser.username });
+
+  updateInventoryTables();
+  updateDispatchTables();
+});
+
+// Request dispatch
+$('#request-dispatch').click(() => {
+  const itemId = $('#dispatch-item').val();
+  const qty = parseInt($('#dispatch-qty').val());
+  const item = inventory.find(i => i.ItemID === itemId);
+  if (!item || qty > item.Quantity) {
+    alert('Insufficient inventory');
+    return;
+  }
+
+  const txId = 'TX' + Date.now();
+  transactions.push({ TransactionID: txId, Type: 'Dispatch', ItemID: itemId, ItemName: item.ItemName, Quantity: qty, Status: 'Pending', Date: new Date().toISOString().slice(0,10), User: currentUser.username });
+  updateDispatchTables();
+});
+
+// Approve dispatch
+$('#approve-btn').click(() => {
+  $('#approve-table tr').each((index, row) => {
+    if (index === 0) return;
+    const txId = $(row).find('td').eq(0).text();
+    const tx = transactions.find(t => t.TransactionID === txId);
+    const inv = inventory.find(i => i.ItemID === tx.ItemID);
+
+    if (inv && inv.Quantity >= tx.Quantity) {
+      inv.Quantity -= tx.Quantity;
+      tx.Status = 'Approved';
+    } else {
+      tx.Status = 'Rejected';
+    }
+  });
+  updateInventoryTables();
+  updateDispatchTables();
+});
+
+// Reject dispatch
+$('#reject-btn').click(() => {
+  $('#approve-table tr').each((index, row) => {
+    if (index === 0) return;
+    const txId = $(row).find('td').eq(0).text();
+    const tx = transactions.find(t => t.TransactionID === txId);
+    tx.Status = 'Rejected';
+  });
+  updateDispatchTables();
+});
+
+// Populate dispatch items
+document.addEventListener('DOMContentLoaded', () => {
+  $('#recv-date').val(new Date().toISOString().slice(0, 10));
+  $('#dispatch-item').on('click', () => {
+    $('#dispatch-item').empty();
+    inventory.forEach(item => {
+      if (item.Quantity > 0) $('#dispatch-item').append(`<option value="${item.ItemID}">${item.ItemID} - ${item.ItemName}</option>`);
+    });
+  });
+});
