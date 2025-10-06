@@ -27,13 +27,11 @@
       font-size: 22px;
     }
     .banner img {
-      width: 100%;         /* Fit full width of page */
-      max-width: 1000px;   /* Limit maximum size */
-      height: auto;        /* Keep proportions */
+      width: 100vw;        /* full viewport width */
+      height: 80vh;        /* 80% of screen height */
+      object-fit: cover;   /* crop edges if needed */
       display: block;
-      margin: 20px auto;   /* Center it */
-      border-radius: 10px; /* optional: rounded corners */
-      object-fit: contain; /* Scale properly */
+      margin: 0 auto;
     }
     main {
       padding: 20px;
@@ -44,7 +42,7 @@
 <body>
 
   <header>
-    <h1>TELLERSALES PERFORMANCE</h1>
+    <h1 id="chartTitle">Loading...</h1>
     <h2># OPERATION NIGHT HAMMER</h2>
   </header>
 
@@ -52,7 +50,36 @@
     <img src="https://raw.githubusercontent.com/Dataanalyst-11/presentation/main/WhatsApp%20Image%202025-10-03%20at%2017.17.05_1f556b58.jpg" 
          alt="Operation Night Hammer Banner">
   </div>
+
+  <main>
+    <p>Welcome to the presentation of Operation Night Hammer.</p>
+  </main>
+
+  <script>
+    function updateTitle() {
+      const titleElement = document.getElementById('chartTitle');
+
+      const now = new Date();
+      const options = {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      };
+
+      const formattedTime = now.toLocaleString('en-GB', options).replace(',', '');
+      const titleText = `TELESALES PERFORMANCE AS AT ${formattedTime}`;
+
+      titleElement.textContent = titleText;
+      document.title = titleText; // also updates browser tab title
+    }
+
+    // run immediately + every second
+    updateTitle();
+    setInterval(updateTitle, 1000);
+  </script>
+
 </body>
 </html>
-
-
