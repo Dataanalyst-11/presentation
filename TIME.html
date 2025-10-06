@@ -27,11 +27,13 @@
       font-size: 22px;
     }
     .banner img {
-      width: 90vw;        /* full viewport width */
-      height: 60vh;        /* 80% of screen height */
-      object-fit: cover;   /* crop edges if needed, keeps proportions */
+      width: 100%;         /* Fit full width of page */
+      max-width: 1000px;   /* Limit maximum size */
+      height: auto;        /* Keep proportions */
       display: block;
-      margin: 0 auto;
+      margin: 20px auto;   /* Center it */
+      border-radius: 10px; /* optional: rounded corners */
+      object-fit: contain; /* Scale properly */
     }
     main {
       padding: 20px;
@@ -42,7 +44,7 @@
 <body>
 
   <header>
-    <h1>TELLERSALES PERFORMANCE</h1>
+    <h1>TELESALES PERFORMANCE AS AT 06 Oct 2025 08:36:52</h1>
     <h2># OPERATION NIGHT HAMMER</h2>
   </header>
 
@@ -57,7 +59,3 @@
 
 </body>
 </html>
-
-
-
-
