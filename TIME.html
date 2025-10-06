@@ -27,13 +27,11 @@
       font-size: 22px;
     }
     .banner img {
-      width: 150%;         /* Fit full width of page */
-      max-width: 1000px;   /* Limit maximum size */
-      height: 90%;        /* Keep proportions */
+      width: 100vw;        /* full viewport width */
+      height: 80vh;        /* 80% of screen height */
+      object-fit: cover;   /* crop edges if needed, keeps proportions */
       display: block;
-      margin: 20px auto;   /* Center it */
-      border-radius: 10px; /* optional: rounded corners */
-      object-fit: contain; /* Scale properly */
+      margin: 0 auto;
     }
     main {
       padding: 20px;
@@ -59,4 +57,3 @@
 
 </body>
 </html>
-
