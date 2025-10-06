@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Real-Time Title</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+
+    h1 {
+      font-size: 24px;
+      color: #007BFF; /* Blue color */
+    }
+
+    h2 {
+      font-size: 22px;
+      font-weight: bold;
+      color: #007BFF; /* Bold Blue */
+      margin-top: 20px;
+    }
+
+    img {
+      margin-top: 20px;
+      width: 100%;      /* Full width banner */
+      height: auto;     /* Keep proportions */
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <h1 id="chartTitle">Loading...</h1>
+  <h2># OPERATION NIGHT HAMMER</h2>
+
+  <!-- Banner Image from D: drive -->
+  <img src="file:///D:/WhatsApp%20Image%202025-10-03%20at%2017.17.05_5976ebf6.jpg" 
+       alt="Operation Night Hammer Banner">
+
+  <script>
+    function updateTitle() {
+      const titleElement = document.getElementById('chartTitle');
+
+      const now = new Date();
+      const options = {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      };
+
+      const formattedTime = now.toLocaleString('en-GB', options).replace(',', '');
+      const titleText = `TELESALES PERFORMANCE AS AT ${formattedTime}`;
+
+      titleElement.textContent = titleText;
+      document.title = titleText;
+    }
+
+    updateTitle();
+    setInterval(updateTitle, 1000);
+  </script>
+
+</body>
+</html>
